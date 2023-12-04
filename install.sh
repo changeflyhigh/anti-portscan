@@ -38,15 +38,15 @@ iptables -A trap-scan -j DROP
 
 
 # 目标网卡
-DEV=eth0
+ifconfig eth0 &> /dev/null && _I_DEV='-i eth0' || _I_DEV=''
 
 # 目标链
 INPUT="-A INPUT"
 # INPUT=-t raw -A PREROUTING
-# 不推荐
+# 不推荐PREROUTING
 
 # 连接未开放端口，大概率是扫描者，交给 trap-scan 处理
-iptables -i $DEV $INPUT -p tcp --syn -m set ! --match-set pub-port-set dst -j trap-scan
+iptables $_I_DEV $INPUT -p tcp --syn -m set ! --match-set pub-port-set dst -j trap-scan
 
 # 如果该 IP 继续连接未开放端口，过期时间不复位，但包计数器会累计，
 # 如果累计超过 PORT_SCAN_MAX，该 IP 将无法连接任何端口，直到过期。
@@ -54,10 +54,10 @@ PORT_SCAN_MAX=30
 # 连接未开放端口超过 PORT_SCAN_MAX 次的 IP，禁止访问任何服务！
 # 此处不更新计数器
 # 已建立的 TCP 不影响，因为此处只针对 --syn
-iptables -i $DEV $INPUT -p tcp --syn -m set ! --update-counters --match-set scanner-ip-set src --packets-gt $PORT_SCAN_MAX -j DROP
+iptables $_I_DEV $INPUT -p tcp --syn -m set ! --update-counters --match-set scanner-ip-set src --packets-gt $PORT_SCAN_MAX -j DROP
 
 # 屏蔽非 SYN 类型的端口扫描
 # 例如扫描者发送 ACK，服务器默认会回复 RST，仍有可能暴露端口
 # 因此对于非 SYN 包，如果不匹配已建立的连接，则丢弃
-iptables -i $DEV -A INPUT -p tcp ! --syn -m conntrack ! --ctstate ESTABLISHED,RELATED -j DROP
+iptables $_I_DEV -A INPUT -p tcp ! --syn -m conntrack ! --ctstate ESTABLISHED,RELATED -j DROP
 
