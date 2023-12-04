@@ -13,7 +13,7 @@ ipset add pub-port-set 443
 # 添加更多端口 ...
 
 # 如果有 IP 连接未开放端口，该 IP 将进入扫描者名单，过期时间 IP_DENY_SECOND 秒。
-IP_DENY_SECOND=30
+IP_DENY_SECOND=300
 # 名单最大条数
 # 例如 100Mbps 网络下 IP_DENY_SECOND 秒能收到多少 SYN 包？（SYN 最小 60B）
 IP_SET_MAX=$((100 * 1024 * 1024 / 8 / 60 * $IP_DENY_SECOND))
