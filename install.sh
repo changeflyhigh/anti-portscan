@@ -50,7 +50,7 @@ iptables -i $DEV $INPUT -p tcp --syn -m set ! --match-set pub-port-set dst -j tr
 
 # 如果该 IP 继续连接未开放端口，过期时间不复位，但包计数器会累计，
 # 如果累计超过 PORT_SCAN_MAX，该 IP 将无法连接任何端口，直到过期。
-PORT_SCAN_MAX=3
+PORT_SCAN_MAX=30
 # 连接未开放端口超过 PORT_SCAN_MAX 次的 IP，禁止访问任何服务！
 # 此处不更新计数器
 # 已建立的 TCP 不影响，因为此处只针对 --syn
